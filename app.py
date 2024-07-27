@@ -4,6 +4,8 @@ from langchain_openai import OpenAIEmbeddings
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
+from chromadb.client import PersistentClient
+from chromadb import Chroma
 
 app = FastAPI()
 SEA_ENG = OpenAIEmbeddings(api_key='sk-proj-fMPLXVUCyOWPCFeuM4NcT3BlbkFJbABO62e51cxt3pGvrGuu', model='text-embedding-3-large')
@@ -14,40 +16,37 @@ class SEAInput(BaseModel):
 class SEAInput(BaseModel):
     input: str
 
-def connection(db_path='sea.db'):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
-
-    query = "SELECT title, content, description FROM sead"
-    cursor.execute(query)
-
-    data = cursor.fetchall()
-    conn.close()
-
-    tickets = []
-    for row in data:
-        tickets.append({
-            "title": row[0],
-            "content": row[1],
-            "description": row[2]
-        })
-    
-    return tickets
-
 def cosine_similarity(a, b):
     return np.dot(a, b.T) / (np.linalg.norm(a) * np.linalg.norm(b, axis=1))
 
 @app.post("/embedding_engine")
-def embedding_engine():
-    tickets = connection()
+def embedding_engine(db_path='sea.db', name='ticket_collection', embeddings=SEA_ENG):
+    
+    tickets = connection(db_path)
+    client = PersistentClient(path='store')
+
+    try:
+        collection = client.get_collection(name=name)
+        print('Collection already exists')
+    except Exception as e:
+        print(f'Collection does not exist, creating a new one: {e}')
+        collection = client.get_or_create_collection(name=name)
+
     tickets_processed = []
     for ticket in tickets:
         concatenated_str = f"{ticket['title']} {ticket['content']} {ticket['description']}"
-        tickets_processed.append(SEA_ENG.embed_query(concatenated_str))
-    tickets_processed = np.vstack(tickets_processed)
-    return tickets_processed
+        embedded_vector = embeddings(concatenated_str)
+        tickets_processed.append({
+            'document': concatenated_str,
+            'vector': embedded_vector
+        })
 
-tickets_processed = embedding_engine()
+    for ticket in tickets_processed:
+        collection.add(document=ticket['document'], vector=ticket['vector'])
+
+    return collection
+
+vector_db = embedding_engine()
 
 @app.post("/sea")
 async def SEA(input_data: SEAInput):
