@@ -8,7 +8,7 @@ from typing import List
 app = FastAPI()
 
 SEA_ENG = OpenAIEmbeddings(
-    api_key='sk-proj-Bhy45uAV5zNiLmpfbxArT3BlbkFJNll9s4LiSGPhTq0qiMkQ', model='text-embedding-3-large')
+    api_key='sk-proj-1RXjhlpeoY5IZaQXgNjET3BlbkFJTaHlebemXOhIIPc59CUW', model='text-embedding-3-large')
 
 
 class SEAInput(BaseModel):
