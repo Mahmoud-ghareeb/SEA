@@ -4,11 +4,16 @@ from langchain_openai import OpenAIEmbeddings
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import List
+from dotenv import load_dotenv
+import os
+
+
+load_dotenv()
 
 app = FastAPI()
 
 SEA_ENG = OpenAIEmbeddings(
-    api_key='sk-proj-1RXjhlpeoY5IZaQXgNjET3BlbkFJTaHlebemXOhIIPc59CUW', model='text-embedding-3-large')
+    api_key=os.getenv('API_KEY'), model='text-embedding-3-large')
 
 
 class SEAInput(BaseModel):
