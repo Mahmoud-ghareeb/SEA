@@ -44,8 +44,7 @@ def embedding_engine():
     tickets = connection()
     tickets_processed = []
     for ticket in tickets:
-        concatenated_str = f"{ticket['title']} {
-            ticket['content']} {ticket['description']}"
+        concatenated_str = f"{ticket['title']} {ticket['content']} {ticket['description']}"
         tickets_processed.append(SEA_ENG.embed_query(concatenated_str))
     tickets_processed = np.vstack(tickets_processed)
     return tickets_processed
