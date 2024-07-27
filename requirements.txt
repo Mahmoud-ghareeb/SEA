@@ -1,0 +1,9 @@
+fastapi
+pydantic
+numpy
+openai
+langchain
+sqlite
+uvicorn
+langchain-community
+textblob
