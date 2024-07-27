@@ -3,7 +3,8 @@ pydantic
 numpy
 openai
 langchain
-sqlite
 uvicorn
 langchain-community
 textblob
+chromadb
+unicorn
