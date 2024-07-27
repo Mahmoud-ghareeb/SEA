@@ -15,32 +15,12 @@ app = FastAPI()
 class SEAKey(BaseModel):
     key: str
 
-SEA_ENG = None
-tickets_processed = None
-
-
-@app.post("/start")
-def start(input_data: SEAKey):
-    global SEA_ENG
-    global tickets_processed
-
-    SEA_ENG = OpenAIEmbeddings(
-        api_key=input_data.key, model='text-embedding-3-large')
-
-    tickets = connection()
-    tickets_processed = []
-    for ticket in tickets:
-        concatenated_str = f"{ticket['title']} {
-            ticket['content']} {ticket['description']}"
-
-        tickets_processed.append(SEA_ENG.embed_query(concatenated_str))
-    tickets_processed = np.vstack(tickets_processed)
-
-    return {"success": "SEA_ENG initialized successfully"}
-
-
 class SEAInput(BaseModel):
     text: str
+
+
+SEA_ENG = None
+tickets_processed = None
 
 
 def connection(db_path='sea.db'):
@@ -66,6 +46,25 @@ def connection(db_path='sea.db'):
 
 def cosine_similarity(a, b):
     return np.dot(a, b.T) / (np.linalg.norm(a) * np.linalg.norm(b, axis=1))
+
+@app.post("/start")
+def start(input_data: SEAKey):
+    global SEA_ENG
+    global tickets_processed
+
+    SEA_ENG = OpenAIEmbeddings(
+        api_key=input_data.key, model='text-embedding-3-large')
+
+    tickets = connection()
+    tickets_processed = []
+    for ticket in tickets:
+        concatenated_str = f"{ticket['title']} {
+            ticket['content']} {ticket['description']}"
+
+        tickets_processed.append(SEA_ENG.embed_query(concatenated_str))
+    tickets_processed = np.vstack(tickets_processed)
+
+    return {"success": "SEA_ENG initialized successfully"}
     
 
 @app.post("/sea")
