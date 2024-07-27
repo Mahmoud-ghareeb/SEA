@@ -13,7 +13,7 @@ load_dotenv()
 app = FastAPI()
 
 SEA_ENG = OpenAIEmbeddings(
-    api_key=os.getenv('OPENAI_API_KEY'), model='text-embedding-3-large')
+    api_key=${{shared.OPENAI_API_KEY}}, model='text-embedding-3-large')
 
 
 class SEAInput(BaseModel):
